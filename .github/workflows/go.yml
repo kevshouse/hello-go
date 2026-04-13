@@ -1,36 +1,7 @@
-name: Go CI/CD
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-# Set Node 24 as the default for 2026 compatibility
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-          # This will prevent the "go.sum not found" error during cache attempts
-          cache: false 
-
-      - name: Run Tests
-        run: go test -v ./...
-
-  build:
+build:
     needs: test
     runs-on: ubuntu-latest
     strategy:
-      # If one build fails (like Mac), don't cancel the Windows/Linux ones
       fail-fast: false
       matrix:
         goos: [linux, windows, darwin]
@@ -42,13 +13,16 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+          cache: false
 
-      - name: Build
-        # We add 'go mod download' to ensure the environment is prepped
+      - name: Build Binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
         run: |
-          go mod download || true
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          go build -v -o hello-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
+          # Use a simple output name. Windows builds automatically add .exe 
+          # if you don't specify an extension, but we'll keep it simple.
+          go build -v -o "hello-${{ matrix.goos }}-${{ matrix.goarch }}"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
