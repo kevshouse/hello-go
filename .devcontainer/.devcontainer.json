@@ -1,0 +1,40 @@
+{
+    "name": "Go (42 to Professional)",
+    "image": "mcr.microsoft.com/devcontainers/go:1-1.22-bookworm",
+    
+    // Features are self-contained snippets to add tools
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:1": {
+            "configureZshAsDefaultShell": true
+        },
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+
+    // VS Code Specific Settings
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "go.useLanguageServer": true,
+                "go.lintTool": "golangci-lint",
+                "go.lintOnSave": "package",
+                "go.formatTool": "gofmt",
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.organizeImports": "explicit"
+                }
+            },
+            "extensions": [
+                "golang.go",           // The official Go extension
+                "eamodio.gitlens",     // Supercharged Git views
+                "usernamehw.errorlens", // Shows errors inline (no more hovering!)
+                "mhutchie.git-graph"   // Visualizes your branch history
+            ]
+        }
+    },
+
+    // Runs once when the container is created
+    "postCreateCommand": "go version && go mod tidy",
+
+    // Keeps the environment consistent across machines
+    "remoteUser": "vscode"
+}
